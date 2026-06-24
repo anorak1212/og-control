@@ -1,0 +1,13 @@
+# Dependencias
+node_modules/
+
+# Builds de Rust / Tauri
+src-tauri/target/
+
+# Base de datos generada en tiempo de ejecución
+src-tauri/datos/
+datos/
+
+# Sistema
+.DS_Store
+Thumbs.db

@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OG Control · Productos &amp; Punto de Venta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/style.css">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="assets/logo/logo.jpeg" alt="OG" class="brand-logo-img">
+      <div class="brand-text">
+        <strong>OG CONTROL</strong>
+        <small>Productos &amp; Venta</small>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <button class="nav-item is-active" data-view="dashboard">
+        <span class="nav-ico">◆</span> Dashboard
+      </button>
+      <button class="nav-item" data-view="productos">
+        <span class="nav-ico">▣</span> Productos
+        <span class="nav-count" id="navProductCount">0</span>
+      </button>
+      <button class="nav-item" data-view="pos">
+        <span class="nav-ico">▶</span> Punto de Venta
+      </button>
+      <button class="nav-item" data-view="ofertas">
+        <span class="nav-ico">★</span> Ofertas
+        <span class="nav-count" id="navOfertasCount">0</span>
+      </button>
+      <button class="nav-item" data-view="reportes">
+        <span class="nav-ico">▤</span> Reportes
+      </button>
+    </nav>
+
+    <div class="sidebar-foot">
+      <button class="btn btn-ghost btn-config" id="btnConfig">⚙ Configuración</button>
+      <a href="#" id="btnLogout" class="btn btn-ghost btn-logout">⏻ Cerrar sesión</a>
+    </div>
+  </aside>
+
+  <!-- ===================== MAIN ===================== -->
+  <main class="main">
+
+    <!-- ---------- DASHBOARD ---------- -->
+    <section class="view is-active" id="view-dashboard">
+      <header class="view-head">
+        <div>
+          <h1>Dashboard</h1>
+          <p class="subt">Resumen general del inventario y ventas</p>
+        </div>
+        <button class="btn btn-ghost" id="btnRefreshDash">↻ Actualizar</button>
+      </header>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <span class="stat-corner"></span>
+          <div class="stat-num" id="statTotalProductos">0</div>
+          <div class="stat-label">Productos activos</div>
+        </div>
+        <div class="stat-card stat-warn">
+          <span class="stat-corner"></span>
+          <div class="stat-num" id="statBajoStock">0</div>
+          <div class="stat-label">Con stock bajo</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-corner"></span>
+          <div class="stat-num" id="statVentasHoy">0</div>
+          <div class="stat-label">Ventas registradas</div>
+        </div>
+        <div class="stat-card stat-accent">
+          <span class="stat-corner"></span>
+          <div class="stat-num" id="statIngresos">$0.00</div>
+          <div class="stat-label">Ingresos totales</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Inventario crítico</h2>
+          <span class="panel-tag">Stock ≤ 5 unidades</span>
+        </div>
+        <div class="table-wrap">
+          <table class="table" id="tablaCritico">
+            <thead>
+              <tr><th></th><th>SKU</th><th>Producto</th><th>Categoría</th><th>Precio</th><th>Stock</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Productos por categoría</h2>
+          <span class="panel-tag">Distribución del catálogo</span>
+        </div>
+        <div class="distribucion" id="distribucionCategorias"></div>
+      </div>
+    </section>
+
+    <!-- ---------- PRODUCTOS (CRUD) ---------- -->
+    <section class="view" id="view-productos">
+      <header class="view-head">
+        <div>
+          <h1>Productos</h1>
+          <p class="subt">Alta, edición y baja del catálogo</p>
+        </div>
+        <button class="btn btn-primary" id="btnNuevoProducto">+ Nuevo producto</button>
+      </header>
+
+      <div class="panel">
+        <div class="panel-head panel-head-tools">
+          <div class="search-box">
+            <span>⌕</span>
+            <input type="text" id="buscarProducto" placeholder="Buscar por nombre o SKU…">
+          </div>
+          <select id="filtroCategoria">
+            <option value="">Todas las categorías</option>
+              <option value="Suplementos">Suplementos</option>
+              <option value="Accesorios">Accesorios</option>
+              <option value="Botellas">Botellas</option>
+              <option value="Ropa">Ropa</option>
+              <option value="Equipo">Equipo</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table class="table" id="tablaProductos">
+            <thead>
+              <tr>
+                <th></th><th>SKU</th><th>Producto</th><th>Categoría</th><th>Precio</th><th>Stock</th><th>Estado</th><th class="th-acc">Acciones</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="productosEmpty" hidden>
+          <p>No hay productos que coincidan con tu búsqueda.</p>
+        </div>
+        <div class="pagination" id="paginacionProductos"></div>
+      </div>
+    </section>
+
+    <!-- ---------- PUNTO DE VENTA (POS) ---------- -->
+    <section class="view" id="view-pos">
+      <header class="view-head">
+        <div>
+          <h1>Punto de Venta</h1>
+          <p class="subt">Toca un producto para agregarlo al ticket</p>
+        </div>
+        <div class="search-box pos-search">
+          <span>⌕</span>
+          <input type="text" id="buscarPos" placeholder="Buscar producto…">
+        </div>
+      </header>
+
+      <div class="pos-layout">
+        <div class="pos-grid" id="posGrid"></div>
+
+        <aside class="pos-cart">
+          <div class="pos-cart-head">
+            <h2>Ticket</h2>
+            <button class="link-btn" id="btnVaciarCarrito">Vaciar</button>
+          </div>
+          <div class="pos-cart-items" id="carritoItems">
+            <div class="cart-empty" id="carritoEmpty">El ticket está vacío</div>
+          </div>
+          <div class="pos-cart-summary">
+            <div class="row"><span>Subtotal</span><strong id="cartSubtotal">$0.00</strong></div>
+            <div class="row total"><span>Total</span><strong id="cartTotal">$0.00</strong></div>
+            <button class="btn btn-primary btn-block" id="btnCobrar">Cobrar venta</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ---------- REPORTES ---------- -->
+    <section class="view" id="view-reportes">
+      <header class="view-head">
+        <div>
+          <h1>Reportes</h1>
+          <p class="subt">Historial de ventas guardado en PostgreSQL</p>
+        </div>
+        <div class="view-head-actions">
+          <a href="#" class="btn btn-ghost" id="btnExportarCsv">⤓ Exportar CSV</a>
+          <button class="btn btn-ghost" id="btnLimpiarVentas">Limpiar historial</button>
+        </div>
+      </header>
+
+      <div class="stat-grid stat-grid-3">
+        <div class="stat-card">
+          <span class="stat-corner"></span>
+          <div class="stat-num" id="repTotalVentas">0</div>
+          <div class="stat-label">Ventas realizadas</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-corner"></span>
+          <div class="stat-num" id="repTicketProm">$0.00</div>
+          <div class="stat-label">Ticket promedio</div>
+        </div>
+        <div class="stat-card stat-accent">
+          <span class="stat-corner"></span>
+          <div class="stat-num" id="repIngresos">$0.00</div>
+          <div class="stat-label">Ingresos totales</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Ventas registradas</h2>
+        </div>
+        <div class="table-wrap">
+          <table class="table" id="tablaVentas">
+            <thead>
+              <tr><th>Folio</th><th>Fecha</th><th>Artículos</th><th>Total</th><th></th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="ventasEmpty" hidden>
+          <p>Aún no hay ventas registradas. Ve a Punto de Venta para crear una.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- OFERTAS / PROMOCIONES ---------- -->
+    <section class="view" id="view-ofertas">
+      <header class="view-head">
+        <div>
+          <h1>Ofertas</h1>
+          <p class="subt">Programa promociones y descuentos que se aplican al cobrar</p>
+        </div>
+        <button class="btn btn-primary" id="btnNuevaOferta">+ Nueva oferta</button>
+      </header>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Promociones registradas</h2>
+          <span class="panel-tag">Las activas se aplican automáticamente</span>
+        </div>
+        <div class="table-wrap">
+          <table class="table" id="tablaOfertas">
+            <thead>
+              <tr><th>Nombre</th><th>Tipo</th><th>Aplica a</th><th>Detalle</th><th>Estado</th><th class="th-acc">Acciones</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="ofertasEmpty" hidden>
+          <p>Aún no hay promociones. Crea una con "Nueva oferta".</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ===================== MODAL PRODUCTO ===================== -->
+<div class="modal-backdrop" id="modalBackdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <h2 id="modalTitulo">Nuevo producto</h2>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+    <form id="formProducto" class="modal-body" autocomplete="off">
+      <input type="hidden" id="fId">
+      <input type="hidden" id="fImagenActual">
+
+      <div class="modal-cols">
+
+        <!-- Columna izquierda: imagen grande -->
+        <div class="modal-col-img">
+          <div class="image-big">
+            <img id="fImagenPreview" src="assets/productos/placeholder.svg" alt="Previsualización">
+          </div>
+          <input type="file" id="fImagen" accept="image/png, image/jpeg, image/webp, image/gif">
+          <small class="hint">Sube un archivo (máx 2 MB)…</small>
+          <input type="url" id="fImagenUrl" placeholder="…o pega un link de imagen (https://…)">
+          <small class="hint">La imagen es opcional. Si pones link y archivo, gana el archivo.</small>
+        </div>
+
+        <!-- Columna derecha: todos los campos -->
+        <div class="modal-col-fields">
+          <label class="campo-nombre">
+            Nombre del producto
+            <input type="text" id="fNombre" placeholder="Ej. Proteína Whey Vainilla 2lb">
+            <div class="suggest-box" id="sugerenciasNombre" hidden></div>
+            <small class="hint">Escribe y elige una coincidencia si el producto ya existió antes, o sigue escribiendo para crear uno nuevo.</small>
+          </label>
+
+          <label>
+            Categoría
+            <select id="fCategoria">
+              <option value="Suplementos">Suplementos</option>
+              <option value="Accesorios">Accesorios</option>
+              <option value="Botellas">Botellas</option>
+              <option value="Ropa">Ropa</option>
+              <option value="Equipo">Equipo</option>
+            </select>
+          </label>
+
+          <label>
+            SKU <span class="hint-inline">(generado automáticamente)</span>
+            <input type="text" id="fSku" readonly placeholder="Se genera al escribir…">
+          </label>
+
+          <div class="form-row">
+            <label>
+              Precio (MXN)
+              <input type="number" id="fPrecio" min="0" step="0.01" placeholder="0.00">
+            </label>
+            <label>
+              Stock
+              <input type="number" id="fStock" min="0" step="1" placeholder="0">
+            </label>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-foot">
+        <button type="button" class="btn btn-ghost" id="btnCancelarModal">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar producto</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== MODAL OFERTA ===================== -->
+<div class="modal-backdrop" id="modalOfertaBackdrop" hidden>
+  <div class="modal modal-sm" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <h2 id="modalOfertaTitulo">Nueva oferta</h2>
+      <button class="modal-close" id="modalOfertaClose">✕</button>
+    </div>
+    <form id="formOferta" class="modal-body" autocomplete="off">
+      <input type="hidden" id="oId">
+
+      <label>
+        Nombre de la oferta
+        <input type="text" id="oNombre" placeholder="Ej. Martes de proteína">
+      </label>
+
+      <label>
+        Tipo de promoción
+        <select id="oTipo">
+          <option value="pct_producto">% de descuento a un producto</option>
+          <option value="pct_venta">% de descuento a toda la venta</option>
+          <option value="precio_fijo">Precio especial fijo (un producto)</option>
+          <option value="nx">Lleva N, paga M (ej. 2x1)</option>
+        </select>
+      </label>
+
+      <label id="oCampoProducto">
+        Producto
+        <select id="oProducto"></select>
+      </label>
+
+      <label id="oCampoValor">
+        <span id="oValorLabel">Porcentaje (%)</span>
+        <input type="number" id="oValor" min="0" step="0.01" placeholder="0">
+      </label>
+
+      <div class="form-row" id="oCampoNx" hidden>
+        <label>
+          Lleva
+          <input type="number" id="oLleva" min="2" step="1" placeholder="2">
+        </label>
+        <label>
+          Paga
+          <input type="number" id="oPaga" min="1" step="1" placeholder="1">
+        </label>
+      </div>
+
+      <div class="modal-foot">
+        <button type="button" class="btn btn-ghost" id="btnCancelarOferta">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar oferta</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== MODAL CONFIGURACIÓN ===================== -->
+<div class="modal-backdrop" id="modalConfigBackdrop" hidden>
+  <div class="modal modal-sm" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <h2>Configuración</h2>
+      <button class="modal-close" id="modalConfigClose">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <label>
+        Color de acento
+        <div class="color-options" id="colorOptions">
+          <button type="button" class="color-dot" data-color="#ffe600" style="background:#ffe600" title="Amarillo"></button>
+          <button type="button" class="color-dot" data-color="#3ddc84" style="background:#3ddc84" title="Verde"></button>
+          <button type="button" class="color-dot" data-color="#4d9fff" style="background:#4d9fff" title="Azul"></button>
+          <button type="button" class="color-dot" data-color="#ff5ca8" style="background:#ff5ca8" title="Rosa"></button>
+          <button type="button" class="color-dot" data-color="#ff8c42" style="background:#ff8c42" title="Naranja"></button>
+          <button type="button" class="color-dot" data-color="#b15cff" style="background:#b15cff" title="Morado"></button>
+        </div>
+      </label>
+
+      <label>
+        Tema de fondo
+        <div class="theme-options" id="themeOptions">
+          <button type="button" class="theme-btn" data-theme="dark">Oscuro</button>
+          <button type="button" class="theme-btn" data-theme="light">Claro</button>
+        </div>
+      </label>
+
+      <label>
+        Tamaño de fuente: <span id="fontSizeLabel">100%</span>
+        <input type="range" id="fontSizeRange" min="85" max="125" step="5" value="100">
+      </label>
+
+      <div class="modal-foot">
+        <button type="button" class="btn btn-ghost" id="btnResetConfig">Restablecer</button>
+        <button type="button" class="btn btn-primary" id="btnCerrarConfig">Listo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== TOAST ===================== -->
+<div class="toast" id="toast" hidden></div>
+
+<!-- ===================== LOADING OVERLAY ===================== -->
+<div class="loading-overlay" id="loadingOverlay" hidden>
+  <div class="spinner"></div>
+  <span>Cargando datos…</span>
+</div>
+
+<script src="scripts/scripts.js"></script>
+</body>
+</html>

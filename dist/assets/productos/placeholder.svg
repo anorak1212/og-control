@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <rect width="120" height="120" rx="10" fill="#1b1b1b"/>
+  <rect x="0.5" y="0.5" width="119" height="119" rx="9.5" fill="none" stroke="rgba(255,255,255,0.08)"/>
+  <g fill="none" stroke="#ffe600" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" opacity="0.85">
+    <path d="M60 30 L84 44 L84 76 L60 90 L36 76 L36 44 Z"/>
+    <path d="M60 30 L60 58" opacity="0.5"/>
+    <path d="M36 44 L60 58 L84 44" opacity="0.5"/>
+  </g>
+  <text x="60" y="108" font-family="Arial, sans-serif" font-size="9" fill="#66665f" text-anchor="middle" letter-spacing="1">SIN IMAGEN</text>
+</svg>

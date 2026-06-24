@@ -1,0 +1,47 @@
+[package]
+name = "og-control"
+version = "1.0.0"
+description = "OG Control — Punto de venta e inventario (offline)"
+authors = ["Breo"]
+edition = "2021"
+rust-version = "1.77"
+
+# El binario de la app.
+[[bin]]
+name = "og-control"
+path = "src/main.rs"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+# --- Tauri (ventana nativa / empaquetado del .exe) ---
+tauri = { version = "2", features = [] }
+
+# --- Servidor HTTP local que reemplaza a PHP+Apache ---
+axum = "0.7"
+tower-http = { version = "0.5", features = ["fs"] }
+tokio = { version = "1", features = ["rt-multi-thread", "net", "macros"] }
+
+# Incrusta la carpeta dist/ (frontend) DENTRO del binario. Así el .exe
+# final no depende de archivos sueltos: todo viaja adentro y corre
+# offline aunque se mueva el ejecutable a otra carpeta.
+rust-embed = { version = "8", features = ["debug-embed"] }
+mime_guess = "2"
+
+# --- Base de datos local (reemplaza PostgreSQL) ---
+# 'bundled' compila SQLite junto al binario: el usuario NO necesita
+# instalar nada, todo viaja dentro del .exe.
+rusqlite = { version = "0.31", features = ["bundled"] }
+
+# --- JSON ---
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# En release optimizamos tamaño y velocidad del .exe.
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"
