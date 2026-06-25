@@ -1086,3 +1086,21 @@
     margin-top:4px;
   }
   .modal-col-img .hint{ margin:0; }
+
+/* ===================== BANNER MODO DEMO (versión estática) ===================== */
+.demo-flag{
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 9999;
+  background: var(--yellow, #ffe600);
+  color: #0a0a0a;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-align: center;
+  padding: 5px 12px;
+  text-transform: uppercase;
+}
+/* Empujo la app hacia abajo para que el banner no la tape. */
+.app{ padding-top: 26px; }

@@ -11,6 +11,9 @@
 </head>
 <body>
 
+<!-- Aviso de modo demo: esta versión corre 100% en el navegador, sin base de datos. -->
+<div class="demo-flag">MODO DEMO · datos de ejemplo en el navegador (sin base de datos)</div>
+
 <div class="app">
 
   <!-- ===================== SIDEBAR ===================== -->
@@ -45,7 +48,7 @@
 
     <div class="sidebar-foot">
       <button class="btn btn-ghost btn-config" id="btnConfig">⚙ Configuración</button>
-      <a href="#" id="btnLogout" class="btn btn-ghost btn-logout">⏻ Cerrar sesión</a>
+      <a href="#" class="btn btn-ghost btn-logout" id="btnLogout">⏻ Cerrar sesión</a>
     </div>
   </aside>
 
@@ -127,11 +130,11 @@
           </div>
           <select id="filtroCategoria">
             <option value="">Todas las categorías</option>
-              <option value="Suplementos">Suplementos</option>
-              <option value="Accesorios">Accesorios</option>
-              <option value="Botellas">Botellas</option>
-              <option value="Ropa">Ropa</option>
-              <option value="Equipo">Equipo</option>
+            <option value="Suplementos">Suplementos</option>
+            <option value="Accesorios">Accesorios</option>
+            <option value="Botellas">Botellas</option>
+            <option value="Ropa">Ropa</option>
+            <option value="Equipo">Equipo</option>
           </select>
         </div>
         <div class="table-wrap">
@@ -189,10 +192,10 @@
       <header class="view-head">
         <div>
           <h1>Reportes</h1>
-          <p class="subt">Historial de ventas guardado en PostgreSQL</p>
+          <p class="subt">Historial de ventas registrado en la sesión</p>
         </div>
         <div class="view-head-actions">
-          <a href="#" class="btn btn-ghost" id="btnExportarCsv">⤓ Exportar CSV</a>
+          <button class="btn btn-ghost" id="btnExportarCsv">⤓ Exportar CSV</button>
           <button class="btn btn-ghost" id="btnLimpiarVentas">Limpiar historial</button>
         </div>
       </header>
@@ -441,6 +444,8 @@
   <span>Cargando datos…</span>
 </div>
 
+<!-- Datos de ejemplo + capa que simula la base de datos en el navegador -->
+<script src="scripts/mock-data.js"></script>
 <script src="scripts/scripts.js"></script>
 </body>
 </html>

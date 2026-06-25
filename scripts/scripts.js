@@ -14,13 +14,9 @@
      POST accion=limpiar
    ===================================================== */
 
-   // Rutas servidas por el backend en Rust (servidor local 127.0.0.1).
-   // Antes apuntaban a archivos .php; ahora a endpoints /api/*.
-   const API_PRODUCTOS = "/api/productos";
-   const API_VENTAS = "/api/ventas";
-   const API_PROMOCIONES = "/api/promociones";
-   // Token de sesión devuelto por /api/login, guardado en el navegador.
-   const TOKEN_KEY = "og_token";
+   const API_PRODUCTOS = "sites/api_productos.php";
+   const API_VENTAS = "sites/api_ventas.php";
+   const API_PROMOCIONES = "sites/api_promociones.php";
    const PLACEHOLDER_IMG = "assets/productos/placeholder.svg";
    
    const state = {
@@ -48,10 +44,9 @@
    
    function imagenUrl(producto) {
      if (!producto.imagen) return PLACEHOLDER_IMG;
-     // Si ya es una URL completa (http/https) o una imagen embebida
-     // (data URL base64), la uso tal cual. Si no, es un archivo que
-     // vive en assets/productos/.
-     if (/^(https?:\/\/|data:image\/)/i.test(producto.imagen)) return producto.imagen;
+     // Si ya es una URL completa (http/https), la uso tal cual.
+     // Si no, es un archivo subido que vive en assets/productos/.
+     if (/^https?:\/\//i.test(producto.imagen)) return producto.imagen;
      return `assets/productos/${producto.imagen}`;
    }
    
@@ -69,42 +64,11 @@
    }
    
    async function llamar(url, opciones = {}) {
-     // Inyecto el token de sesión en cada petición (equivale a la
-     // cookie de sesión que antes manejaba PHP). El backend lo valida.
-     const headers = new Headers(opciones.headers || {});
-     const token = localStorage.getItem(TOKEN_KEY) || "";
-     if (token) headers.set("x-og-token", token);
-
-     // El backend en Rust recibe JSON, no FormData. Como el resto del
-     // código sigue armando FormData (porque PHP lo pedía), aquí lo
-     // convierto a JSON de forma transparente: nadie más se entera.
-     let body = opciones.body;
-     if (body instanceof FormData) {
-       const obj = {};
-       for (const [clave, valor] of body.entries()) {
-         if (valor instanceof File) {
-           // Una imagen subida: la paso a data URL (base64). Así viaja
-           // como texto y se guarda sin necesidad de subir archivos.
-           obj.imagen_url = await archivoADataUrl(valor);
-         } else if (clave === "id" || clave === "producto_id" ||
-                    clave === "lleva" || clave === "paga") {
-           obj[clave] = valor === "" ? null : Number(valor);
-         } else if (clave === "precio" || clave === "valor" || clave === "stock") {
-           obj[clave] = valor === "" ? 0 : Number(valor);
-         } else {
-           obj[clave] = valor;
-         }
-       }
-       body = JSON.stringify(obj);
-       headers.set("Content-Type", "application/json");
-     }
-
-     const res = await fetch(url, { ...opciones, headers, body });
+     const res = await fetch(url, opciones);
 
      // Si la sesión expiró, el servidor responde 401: de vuelta al login.
      if (res.status === 401) {
-       localStorage.removeItem(TOKEN_KEY);
-       window.location.href = "login.html";
+       window.location.href = "login.php";
        throw new Error("Sesión expirada.");
      }
 
@@ -116,16 +80,6 @@
      }
      if (!data.ok) throw new Error(data.error || "Ocurrió un error inesperado.");
      return data;
-   }
-
-   /** Convierte un File (imagen) a una cadena data URL base64. */
-   function archivoADataUrl(file) {
-     return new Promise((resolve, reject) => {
-       const reader = new FileReader();
-       reader.onload = (ev) => resolve(ev.target.result);
-       reader.onerror = () => reject(new Error("No se pudo leer la imagen."));
-       reader.readAsDataURL(file);
-     });
    }
    
    /* ---------------------------------------------------
@@ -1227,58 +1181,6 @@
    }
    
    document.addEventListener("DOMContentLoaded", () => {
-     // Guardia de sesión del lado cliente: sin token guardado, este
-     // panel no tiene nada que hacer -> directo al login. (El backend
-     // igual rechaza con 401 cualquier petición sin token, así que es
-     // una doble protección, no la única.)
-     if (!localStorage.getItem(TOKEN_KEY)) {
-       window.location.href = "login.html";
-       return;
-     }
-
-     // Cerrar sesión: avisa al backend, borra el token y vuelve al login.
-     const btnLogout = document.getElementById("btnLogout");
-     if (btnLogout) {
-       btnLogout.addEventListener("click", async (e) => {
-         e.preventDefault();
-         try {
-           await fetch("/api/logout", {
-             method: "POST",
-             headers: { "x-og-token": localStorage.getItem(TOKEN_KEY) || "" },
-           });
-         } catch {}
-         localStorage.removeItem(TOKEN_KEY);
-         window.location.href = "login.html";
-       });
-     }
-
-     // Exportar CSV: como necesita mandar el token en el header, no
-     // sirve un enlace directo. Lo pido por fetch y disparo la descarga
-     // con un blob.
-     const btnCsv = document.getElementById("btnExportarCsv");
-     if (btnCsv) {
-       btnCsv.addEventListener("click", async (e) => {
-         e.preventDefault();
-         try {
-           const res = await fetch("/api/ventas?accion=csv", {
-             headers: { "x-og-token": localStorage.getItem(TOKEN_KEY) || "" },
-           });
-           if (!res.ok) throw new Error("No se pudo exportar.");
-           const blob = await res.blob();
-           const url = URL.createObjectURL(blob);
-           const a = document.createElement("a");
-           a.href = url;
-           a.download = "ventas_og_control.csv";
-           document.body.appendChild(a);
-           a.click();
-           a.remove();
-           URL.revokeObjectURL(url);
-         } catch (err) {
-           toast(err.message || "No se pudo exportar el CSV.", true);
-         }
-       });
-     }
-
      initNav();
      initModal();
      initSugerenciasNombre();
